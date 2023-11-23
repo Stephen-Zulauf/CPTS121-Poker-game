@@ -83,57 +83,167 @@ int dealHand(const int wDeck[][13], const char* wFace[], const char* wSuit[], Ha
 void menu_discard(const int wDeck[][13], const char* wFace[], const char* wSuit[], Hand* hand, int place) {
 	int i;
 	int discards = 3;
-	int choice = 0;
+	int choice =  0;
+	Hand choices;
+
+	for (i = 0; i < HANDSIZE; i++) {
+		choices.cards[i].col = 0;
+		choices.cards[i].row = 0;
+		choices.cards[i].number = 0;
+	}
 
 	printf(" -------------------- PLAYER HAND-----------------\n");
 	print_hand(0, hand, wFace, wSuit);
 	printf(" -------------------------------------------------\n");
 	printf(" Which cards would you like to discard?\n");
+
 	printf(" discards left: %d\n", discards);
 
 	for (i = 0; i < HANDSIZE; i++) {
 		printf("%d) %s of %s\n", i+1, wFace[hand->cards[i].row], wSuit[hand->cards[i].col]);
 	}
+	printf("6) Exit\n");
 
 	while (choice != 6) {
 
 		scanf("%d", &choice);
-
-		if (discards == 0 && choice != 6) {
-			switch (choice) {
-			default:
+		
+		switch (choice) {
+		case 6:
+			//exit
+			break;
+		default:
+			if (choice > 0 && choice <= 5 && discards > 0) {
+				if (choices.cards[choice-1].number == 0) {
+					choices.cards[choice-1].number = hand->cards[choice-1].number;
+					choices.cards[choice-1].row = hand->cards[choice-1].row;
+					choices.cards[choice-1].col = hand->cards[choice-1].col;
+					hand->cards[choice-1].number = 0;
+					discards--;
+				}
+				else {
+					hand->cards[choice-1].number = choices.cards[choice-1].number;
+					hand->cards[choice-1].row = choices.cards[choice-1].row;
+					hand->cards[choice-1].col = choices.cards[choice-1].col;
+					choices.cards[choice-1].number = 0;
+					discards++;
+				}
+				system("cls");
 				printf(" -------------------- PLAYER HAND-----------------\n");
 				print_hand(0, hand, wFace, wSuit);
 				printf(" -------------------------------------------------\n");
-				printf(" No Discards Left\n");
-				printf("Enter 6 to exit\n");
+				printf(" Which cards would you like to discard?\n");
+
+				printf(" discards left: %d\n", discards);
+				printf("-----Discards:------\n");
+				for (i = 0; i < HANDSIZE; i++) {
+					if (choices.cards[i].number != 0) {
+						printf("%d) %s of %s\n", i + 1, wFace[choices.cards[i].row], wSuit[choices.cards[i].col]);
+					}
+					
+				}
+				printf("-----------\n");
+
+				for (i = 0; i < HANDSIZE; i++) {
+					if (hand->cards[i].number != 0) {
+						printf("%d) %s of %s\n", i + 1, wFace[hand->cards[i].row], wSuit[hand->cards[i].col]);
+					}
+				}
+				printf("6) Exit\n");
+				choice = 0;
 			}
-		}
-		else {
-			switch (choice) {
-			case 1:
-				//prompt
-				break;
-			case 2:
-				//prompt
-				break;
-			case 3:
-				//prompt
-				break;
-			case 4:
-				//prompt
-				break;
-			case 5:
-				//prompt
-				break;
-			case 6:
-				//exit
-				break;
-			default:
-				printf("invalid choice");
-				break;
+			else if (choice > 0 && choice <= 5 && discards == 0) {
+				if (hand->cards[choice - 1].number == 0 && choices.cards[choice - 1].number != 0) {
+					hand->cards[choice - 1].number = choices.cards[choice - 1].number;
+					hand->cards[choice - 1].row = choices.cards[choice - 1].row;
+					hand->cards[choice - 1].col = choices.cards[choice - 1].col;
+					choices.cards[choice - 1].number = 0;
+					discards++;
+
+					system("cls");
+					printf(" -------------------- PLAYER HAND-----------------\n");
+					print_hand(0, hand, wFace, wSuit);
+					printf(" -------------------------------------------------\n");
+					printf("Which cards would you like to discard?\n");
+
+					printf(" discards left: %d\n", discards);
+					printf("-----Discards:------\n");
+					for (i = 0; i < HANDSIZE; i++) {
+						if (choices.cards[i].number != 0) {
+							printf("%d) %s of %s\n", i + 1, wFace[choices.cards[i].row], wSuit[choices.cards[i].col]);
+						}
+
+					}
+					printf("-----------\n");
+
+					for (i = 0; i < HANDSIZE; i++) {
+						if (hand->cards[i].number != 0) {
+							printf("%d) %s of %s\n", i + 1, wFace[hand->cards[i].row], wSuit[hand->cards[i].col]);
+						}
+					}
+					printf("6) Exit\n");
+					choice = 0;
+				}
+				else {
+					system("cls");
+					printf(" -------------------- PLAYER HAND-----------------\n");
+					print_hand(0, hand, wFace, wSuit);
+					printf(" -------------------------------------------------\n");
+					printf(" No more discards\n");
+
+					printf(" discards left: %d\n", discards);
+					printf("-----Discards:------\n");
+					for (i = 0; i < HANDSIZE; i++) {
+						if (choices.cards[i].number != 0) {
+							printf("%d) %s of %s\n", i + 1, wFace[choices.cards[i].row], wSuit[choices.cards[i].col]);
+						}
+
+					}
+					printf("-----------\n");
+
+					for (i = 0; i < HANDSIZE; i++) {
+						if (hand->cards[i].number != 0) {
+							printf("%d) %s of %s\n", i + 1, wFace[hand->cards[i].row], wSuit[hand->cards[i].col]);
+						}
+					}
+					printf("6) Exit\n");
+					choice = 0;
+
+				}
+
+
 			}
+			else {
+				system("cls");
+				printf(" -------------------- PLAYER HAND-----------------\n");
+				print_hand(0, hand, wFace, wSuit);
+				printf(" -------------------------------------------------\n");
+				printf(" Please Enter Valid choice\n");
+
+				printf(" discards left: %d\n", discards);
+				printf("-----Discards:------\n");
+				for (i = 0; i < HANDSIZE; i++) {
+					if (choices.cards[i].number != 0) {
+						printf("%d) %s of %s\n", i + 1, wFace[choices.cards[i].row], wSuit[choices.cards[i].col]);
+					}
+
+				}
+				printf("-----------\n");
+
+				for (i = 0; i < HANDSIZE; i++) {
+					if (hand->cards[i].number != 0) {
+						printf("%d) %s of %s\n", i + 1, wFace[hand->cards[i].row], wSuit[hand->cards[i].col]);
+					}
+				}
+				printf("6) Exit\n");
+				choice = 0;
+
+			}
+
 		}
+		
+
+		
 	}
 }
 
