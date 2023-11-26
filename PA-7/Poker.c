@@ -66,6 +66,124 @@ void sortHand(Hand* hand) {
 	}
 }
 
+//calculate highest hand value
+int calcHand(Hand* hand) {
+	int handValue = 0;
+	int i, j;
+
+	//if all suits are the same
+	if (hand->cards[0].col == hand->cards[1].col && hand->cards[1].col == hand->cards[2].col && hand->cards[2].col == hand->cards[3].col && hand->cards[3].col == hand->cards[4].col) {
+		//check for royal flush
+		if (hand->cards[0].row == 8 && hand->cards[1].row == 9 && hand->cards[2].row == 10 && hand->cards[3].row == 11 && hand->cards[4].row == 12) {
+			if (handValue < 10) {
+				handValue = 10;
+			}
+
+		}
+		//check for straight flush
+		else if (hand->cards[0].row) + 1 == hand->cards[1].row && (hand->cards[1].row) + 1 == hand->cards[2].row && (hand->cards[2].row) + 1 == hand->cards[3].row && (hand->cards[3].row) + 1 == hand->cards[4].row) {
+			if (handValue < 9) {
+				handValue = 9;
+			}
+
+		}
+		//else flush
+		else {
+			if (handValue < 6) {
+				handValue = 6;
+			}
+
+		}
+
+	}
+	else {
+		//check for four of a kind
+		if (hand->cards[0].row == hand->cards[1].row && hand->cards[1].row == hand->cards[2].row && hand->cards[2].row == hand->cards[3].row) {
+			if (handValue < 8) {
+				handValue = 8;
+			}
+
+		}
+		else if (hand->cards[1].row == hand->cards[2].row && hand->cards[2].row == hand->cards[3].row && hand->cards[3].row == hand->cards[4].row)
+		{
+			if (handValue < 8) {
+				handValue = 8;
+			}
+		}
+
+		//check for full house
+		if (hand->cards[0].row == hand->cards[1].row && hand->cards[1].row == hand->cards[2].row && hand->cards[3].row == hand->cards[4].row) {
+			if (handValue < 7) {
+				handValue = 7;
+			}
+		}
+		else if (hand->cards[0].row == hand->cards[1].row && hand->cards[2].row == hand->cards[3].row && hand->cards[3].row == hand->cards[4].row) {
+			if (handValue < 7) {
+				handValue = 7;
+			}
+		}
+
+		//check for straight
+		if ((hand->cards[0].row) + 1 == hand->cards[1].row && (hand->cards[1].row) + 1 == hand->cards[2].row && (hand->cards[2].row) + 1 == hand->cards[3].row && (hand->cards[3].row) + 1 == hand->cards[4].row) {
+			if (handValue < 5) {
+				handValue = 5;
+			}
+		}
+
+		//check for three of a kind
+		if (hand->cards[0].row == hand->cards[1].row && hand->cards[1].row == hand->cards[2].row) {
+			if (handValue < 4) {
+				handValue = 4;
+			}
+		}
+		else if (hand->cards[1].row == hand->cards[2].row && hand->cards[2].row == hand->cards[3].row) {
+			if (handValue < 4) {
+				handValue = 4;
+			}
+		}
+		else if (hand->cards[2].row == hand->cards[3].row && hand->cards[3].row == hand->cards[4].row) {
+			if (handValue < 4) {
+				handValue = 4;
+			}
+		}
+
+		//check for two pair
+		if (hand->cards[0].row == hand->cards[1].row && hand->cards[2].row == hand->cards[3].row) {
+			if (handValue < 3) {
+				handValue = 3;
+			}
+		}
+		else if (hand->cards[1].row == hand->cards[2].row && hand->cards[3].row == hand->cards[4].row) {
+			if (handValue < 3) {
+				handValue = 3;
+			}
+		}
+		else if (hand->cards[0].row == hand->cards[1].row && hand->cards[3].row == hand->cards[4].row) {
+			if (handValue < 3) {
+				handValue = 3;
+			}
+		}
+
+		//check for pair
+		for (i = 0; i < HANDSIZE - 1; i++) {
+			for (j = i + 1; j < HANDSIZE; j++) {
+				if (hand->cards[i].row == hand->cards[j].row) {
+					if (handValue < 3) {
+						handValue = 3;
+					}
+				}
+			}
+		}
+
+		//if no hands
+		if (handValue < 1) {
+			handValue = 1;
+		}
+	}
+
+	return handValue;
+}
+
 /* deal cards in deck */
 void deal(const int wDeck[][13], const char* wFace[], const char* wSuit[])
 {
@@ -126,42 +244,64 @@ int dealHand(const int wDeck[][13], const char* wFace[], const char* wSuit[], Ha
 	return i + place + 1;
 }
 
-//need suits and face values array
+//need suits and face values array //hand must be sorted
 int dealDealer(const int wDeck[][13], const char* wFace[], const char* wSuit[], Hand* hand, int place) {
 	//calculate holds
-	int discard = 0;
-	int handValue = 0;
 	int hold[HANDSIZE] = { 0 };
+	int value = calcHand(hand);
 	int i;
 
-	//if all suits are the same
-	if (hand->cards[0].col == hand->cards[1].col && hand->cards[1].col == hand->cards[2].col && hand->cards[2].col == hand->cards[3].col && hand->cards[3].col == hand->cards[4].col) {
-		//check for royal flush
-		
-		//check for straight flush
-
-		//check for flush
-	}
-
-	for (i = 0; i < HANDSIZE; i++) {
-
-		
-
-		//check for four of a kind
-
-		//check for full house
-
-		
-
-		//check for straight
-
-		//check for three of a kind
-
-		//check for two pair
-
-		//check for pair
-
-		//calc high card
+	switch (value) {
+	case 1:
+		//determine high card discard others
+	case 2:
+		//discard three
+	case 3:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
+	case 4:
+		//discard two
+	case 5:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
+	case 6:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
+	case 7:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
+	case 8:
+		//discard one
+	case 9:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
+	case 10:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
+	default:
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
 	}
 	
 

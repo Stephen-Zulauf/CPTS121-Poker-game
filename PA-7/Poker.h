@@ -15,14 +15,17 @@
 const char* suit[4] = { "Hearts", "Diamonds", "Clubs", "Spades" };
 
 initialize face array
-const char* face[13] = { "Ace", "Deuce", "Three", "Four", "Five", "Six", "Seven", "Eight",
-	"Nine", "Ten", "Jack", "Queen", "King" }; */
+const char* face[13] = {0"Deuce", 1"Three", 2"Four", 3"Five", 4"Six", 5"Seven", 6"Eight",
+	7"Nine", 8"Ten", 9"Jack", 10"Queen", 11"King", 12"Ace" }; */
 
 
 void shuffle(int wDeck[][13]);
 
 //sort hand into ascending order
 void sortHand(Hand* hand);
+
+//calculate highest hand value
+int calcHand(Hand* hand);
 
 //need suits and face values array
 void deal(const int wDeck[][13], const char* wFace[], const char* wSuit[]);
