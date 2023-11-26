@@ -18,43 +18,43 @@ void print_hand(int face_down, Hand* hand, const char* wFace[], const char* wSui
 		char face = ' ';
 		switch (hand->cards[i].row) {
 		case 0:
-			face = 'A';
-			break;
-		case 1:
 			face = '2';
 			break;
-		case 2:
+		case 1:
 			face = '3';
 			break;
-		case 3:
+		case 2:
 			face = '4';
 			break;
-		case 4:
+		case 3:
 			face = '5';
 			break;
-		case 5:
+		case 4:
 			face = '6';
 			break;
-		case 6:
+		case 5:
 			face = '7';
 			break;
-		case 7:
+		case 6:
 			face = '8';
 			break;
-		case 8:
+		case 7:
 			face = '9';
 			break;
-		case 9:
+		case 8:
 			face = 'T';
 			break;
-		case 10:
+		case 9:
 			face = 'J';
 			break;
-		case 11:
+		case 10:
 			face = 'Q';
 			break;
-		case 12:
+		case 11:
 			face = 'K';
+			break;
+		case 12:
+			face = 'A';
 			break;
 		default:
 			face = '?';

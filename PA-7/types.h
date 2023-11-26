@@ -3,6 +3,9 @@
 
 #define HANDSIZE 5
 
+#include <stdio.h>
+#include <time.h>
+
 typedef struct card {
 	int number;
 	/*char row[10];
@@ -15,6 +18,8 @@ typedef struct hand {
 	Card cards[HANDSIZE];
 
 } Hand;
+
+void delay(int number_of_seconds);
 
 
 #endif // !TYPER_H
