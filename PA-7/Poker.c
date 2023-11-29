@@ -81,7 +81,7 @@ int calcHand(Hand* hand) {
 
 		}
 		//check for straight flush
-		else if (hand->cards[0].row) + 1 == hand->cards[1].row && (hand->cards[1].row) + 1 == hand->cards[2].row && (hand->cards[2].row) + 1 == hand->cards[3].row && (hand->cards[3].row) + 1 == hand->cards[4].row) {
+		else if (hand->cards[0].row == hand->cards[1].row - 1 && hand->cards[1].row == hand->cards[2].row - 1 && hand->cards[2].row == hand->cards[3].row - 1 && hand->cards[3].row == hand->cards[4].row - 1) {
 			if (handValue < 9) {
 				handValue = 9;
 			}
@@ -124,7 +124,7 @@ int calcHand(Hand* hand) {
 		}
 
 		//check for straight
-		if ((hand->cards[0].row) + 1 == hand->cards[1].row && (hand->cards[1].row) + 1 == hand->cards[2].row && (hand->cards[2].row) + 1 == hand->cards[3].row && (hand->cards[3].row) + 1 == hand->cards[4].row) {
+		if (hand->cards[0].row == hand->cards[1].row - 1 && hand->cards[1].row == hand->cards[2].row -1 && hand->cards[2].row == hand->cards[3].row -1 && hand->cards[3].row == hand->cards[4].row - 1) {
 			if (handValue < 5) {
 				handValue = 5;
 			}
@@ -168,8 +168,8 @@ int calcHand(Hand* hand) {
 		for (i = 0; i < HANDSIZE - 1; i++) {
 			for (j = i + 1; j < HANDSIZE; j++) {
 				if (hand->cards[i].row == hand->cards[j].row) {
-					if (handValue < 3) {
-						handValue = 3;
+					if (handValue < 2) {
+						handValue = 2;
 					}
 				}
 			}
@@ -180,8 +180,40 @@ int calcHand(Hand* hand) {
 			handValue = 1;
 		}
 	}
-
 	return handValue;
+}
+
+//calculate winner// 0 for player 1 for computer
+void calcWinner(Hand* player, Hand* comp, int* winner, int* handValue) {
+	int playerVal = calcHand(player);
+	int compVal = calcHand(comp);
+
+	if (playerVal > compVal) {
+		*winner = 0;
+		*handValue = playerVal;
+	}
+	else if (compVal > playerVal) {
+		*winner = 1;
+		*handValue = compVal;
+	}
+	//check for high face card
+	else if(player->cards[4].row > comp->cards[4].row) {
+		*winner = 0;
+		*handValue = playerVal;
+	}
+	else if (comp->cards[4].row > player->cards[4].row) {
+		*winner = 1;
+		*handValue = compVal;
+	}
+	//check for high suit
+	else if (player->cards[4].col > comp->cards[4].col) {
+		*winner = 0;
+		*handValue = playerVal;
+	}
+	else if (comp->cards[4].col > player->cards[4].col) {
+		*winner = 1;
+		*handValue = compVal;
+	}
 }
 
 /* deal cards in deck */
@@ -244,18 +276,34 @@ int dealHand(const int wDeck[][13], const char* wFace[], const char* wSuit[], Ha
 	return i + place + 1;
 }
 
-//need suits and face values array //hand must be sorted
-int dealDealer(const int wDeck[][13], const char* wFace[], const char* wSuit[], Hand* hand, int place) {
+//hand must be sorted
+int discardDealer(Hand* hand) {
 	//calculate holds
 	int hold[HANDSIZE] = { 0 };
 	int value = calcHand(hand);
-	int i;
+	int discards = 0;
+	int i,j;
 
 	switch (value) {
 	case 1:
-		//determine high card discard others
+		//TODO more logic here
+		//determine high cards discard others
+		hold[4] = 1;
+		hold[3] = 1;
+		hold[2] = 1;
+
+		break;
 	case 2:
 		//discard three
+		for (i = 0; i < HANDSIZE - 1; i++) {
+			for (j = i + 1; j < HANDSIZE; j++) {
+				if (hand->cards[i].row == hand->cards[j].row) {
+					hold[i] = 1;
+					hold[j] = 1;
+				}
+			}
+		}
+		break;
 	case 3:
 		//discard none
 		for (i = 0; i < HANDSIZE; i++) {
@@ -264,6 +312,15 @@ int dealDealer(const int wDeck[][13], const char* wFace[], const char* wSuit[], 
 		break;
 	case 4:
 		//discard two
+		for (i = 0; i < HANDSIZE - 1; i++) {
+			for (j = i + 1; j < HANDSIZE; j++) {
+				if (hand->cards[i].row == hand->cards[j].row) {
+					hold[i] = 1;
+					hold[j] = 1;
+				}
+			}
+		}
+		break;
 	case 5:
 		//discard none
 		for (i = 0; i < HANDSIZE; i++) {
@@ -283,7 +340,11 @@ int dealDealer(const int wDeck[][13], const char* wFace[], const char* wSuit[], 
 		}
 		break;
 	case 8:
-		//discard one
+		//discard none
+		for (i = 0; i < HANDSIZE; i++) {
+			hold[i] = 1;
+		}
+		break;
 	case 9:
 		//discard none
 		for (i = 0; i < HANDSIZE; i++) {
@@ -303,7 +364,16 @@ int dealDealer(const int wDeck[][13], const char* wFace[], const char* wSuit[], 
 		}
 		break;
 	}
+
+	//return number discarded
+	for (i = 0; i < HANDSIZE; i++) {
+		if (hold[i] == 0) {
+			hand->cards[i].number = 0;
+			discards += 1;
+		}
+	}
 	
+	return discards;
 
 }
 
@@ -515,15 +585,17 @@ void loop_game() {
 	printf("\n");
 	/*print card list*/
 	int i;
-	for (i = 0; i < HANDSIZE; i++) {
+	/*for (i = 0; i < HANDSIZE; i++) {
 		printf("c:%s of %s - ", face[comp_hand.cards[i].row], suit[comp_hand.cards[i].col]);
-	}
+	}*/
 	printf("\n");
 	for (i = 0; i < HANDSIZE; i++) {
-		printf("p:%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
+		printf("%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
 
 	}
 	/*sort hands*/
+	printf("\n");
+	printf("SORTING HAND.....");
 	delay(3);
 	sortHand(&comp_hand);
 	sortHand(&player_Hand);
@@ -537,12 +609,12 @@ void loop_game() {
 	print_hand(0, &player_Hand, face, suit);
 	printf("\n");
 	/*print card list*/
-	for (i = 0; i < HANDSIZE; i++) {
+	/*for (i = 0; i < HANDSIZE; i++) {
 		printf("c:%s of %s - ", face[comp_hand.cards[i].row], suit[comp_hand.cards[i].col]);
-	}
+	}*/
 	printf("\n");
 	for (i = 0; i < HANDSIZE; i++) {
-		printf("p:%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
+		printf("%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
 
 	}
 
@@ -635,32 +707,30 @@ void loop_game() {
 		}
 	}
 
-	/*sort hands*/
-	sortHand(&comp_hand);
+	/*re-sort player hand*/
 	sortHand(&player_Hand);
-
-	/*dealer draw*/
-	//TODO
 
 	system("cls");
 	/*print graphic card list*/
 	printf(" -------------------- DEALER----------------------\n");
 	print_hand(1, &comp_hand, face, suit);
 	printf("\n");
-
-	/*print card list*/
-	for (i = 0; i < HANDSIZE; i++) {
-		printf("c:%s of %s - ", face[comp_hand.cards[i].row], suit[comp_hand.cards[i].col]);
-	}
-	printf("\n");
 	printf(" ----------------------------------------\n");
-	printf("Dealer Discards:\n");
-	//check for discards in for loop
-	//TODO
 
-	delay(3);
+	/*dealer discard*/
+	discarded = 0;
+	discarded = discardDealer(&comp_hand);
+	place = dealHand(deck, face, suit, &comp_hand, place);
+
+	printf("Dealer Discards %d cards...\n", discarded);
+	
+	/*re-sort dealer hand*/
+	sortHand(&comp_hand);
+
+	delay(6);
 
 	/*reveal hands*/
+	system("cls");
 
 	/*print graphic card list*/
 	printf(" -------------------- DEALER----------------------\n");
@@ -669,13 +739,11 @@ void loop_game() {
 	printf(" -------------------- PLAYER HAND-----------------\n");
 	print_hand(0, &player_Hand, face, suit);
 	printf("\n");
+
 	/*print card list*/
-	for (i = 0; i < HANDSIZE; i++) {
-		printf("c:%s of %s - ", face[comp_hand.cards[i].row], suit[comp_hand.cards[i].col]);
-	}
 	printf("\n");
 	for (i = 0; i < HANDSIZE; i++) {
-		printf("p:%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
+		printf("%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
 
 	}
 	printf("\n");
@@ -688,8 +756,22 @@ void loop_game() {
 		scanf("%d", &choice);
 	}
 
-	/*calculate winner*/
-	//TODO
+	/*reveal calculate winner*/
+	int winner = 0;
+	int winValue = 0;
+
+	/*TESTING
+	//TODO test straight
+	player_Hand.cards[0].row = 8;
+	player_Hand.cards[1].row = 9;
+	player_Hand.cards[2].row = 10;
+	player_Hand.cards[3].row = 11;
+	player_Hand.cards[4].row = 12;
+	*/
+
+	calcWinner(&player_Hand, &comp_hand, &winner, &winValue);
+
+	system("cls");
 
 	printf(" -------------------- DEALER----------------------\n");
 	print_hand(0, &comp_hand, face, suit);
@@ -699,16 +781,24 @@ void loop_game() {
 	printf("\n");
 	/*print card list*/
 	for (i = 0; i < HANDSIZE; i++) {
-		printf("c:%s of %s - ", face[comp_hand.cards[i].row], suit[comp_hand.cards[i].col]);
+		printf("%s of %s - ", face[comp_hand.cards[i].row], suit[comp_hand.cards[i].col]);
 	}
 	printf("\n");
 	for (i = 0; i < HANDSIZE; i++) {
-		printf("p:%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
+		printf("%s of %s - ", face[player_Hand.cards[i].row], suit[player_Hand.cards[i].col]);
 
 	}
 	printf("\n");
 	printf(" ----------------------------------------\n");
-	// player or dealer wins with....
+	//TODO make print function here
+	print_winner(winner, winValue);
+	printf("\n");
+	printf("1)Exit\n");
+
+	choice = 0;
+	while (choice != 1) {
+		scanf("%d", &choice);
+	}
 
 
 }
@@ -733,9 +823,30 @@ void menu_main() {
 			//play
 			system("cls");
 			loop_game();
+			choice = 0;
+			system("cls");
+			print_title();
+			printf("\n");
+			printf("1) Play Game\n");
+			printf("2) Display Rules\n");
+			printf("3) Exit\n");
 			break;
 		case 2:
 			//rules
+			system("cls");
+			print_rules();
+			printf("\n");
+			printf("1) Go Back\n");
+			choice = 0;
+			while (choice != 1) {
+				scanf("%d", &choice);
+			}
+			system("cls");
+			print_title();
+			printf("\n");
+			printf("1) Play Game\n");
+			printf("2) Display Rules\n");
+			printf("3) Exit\n");
 			break;
 		case 3:
 			//exit

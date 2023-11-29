@@ -27,6 +27,9 @@ void sortHand(Hand* hand);
 //calculate highest hand value
 int calcHand(Hand* hand);
 
+//calculate winner
+void calcWinner(Hand* player, Hand* comp, int* winner,int* handValue);
+
 //need suits and face values array
 void deal(const int wDeck[][13], const char* wFace[], const char* wSuit[]);
 
@@ -34,7 +37,7 @@ void deal(const int wDeck[][13], const char* wFace[], const char* wSuit[]);
 int dealHand(const int wDeck[][13], const char* wFace[], const char* wSuit[], Hand* hand, int place);
 
 //need suits and face values array
-int dealDealer(const int wDeck[][13], const char* wFace[], const char* wSuit[], Hand* hand, int place);
+int discardDealer(Hand* hand);
 
 /*discard menu*/
 int menu_discard(const int wDeck[][13], const char* wFace[], const char* wSuit[], Hand* hand, int place);
